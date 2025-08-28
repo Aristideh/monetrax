@@ -63,3 +63,78 @@ body {
 .modal { display: none; }
 /* small helpers */
 .cursor-pointer { cursor: pointer; }
+/* --- Added: responsive & touch-friendly rules --- */
+/* Increase minimum touch target and spacing when on touch devices */
+body.touch button,
+body.touch .input-field,
+body.touch select,
+body.touch input {
+	min-height: 48px;
+	font-size: 16px;
+	touch-action: manipulation;
+}
+
+/* Make auth and action buttons more prominent on small screens */
+@media (max-width: 640px) {
+	/* make header controls stack */
+	#auth-info {
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 8px;
+	}
+	#auth-info button,
+	#auth-info label,
+	#auth-info input[type="file"] + /* placeholder to keep semantics */ {} /* no-op */ {
+		width: 100%;
+		min-width: 0;
+	}
+	/* Transaction input stacking and larger touch areas */
+	.input-field, .card .input-field {
+		font-size: 16px;
+		padding: 12px;
+	}
+	.expense-button, .income-button {
+		width: 100%;
+		min-height: 52px;
+	}
+	/* Modal takes most of viewport on mobile */
+	.modal-content {
+		width: 96%;
+		height: auto;
+		max-width: 760px;
+		padding: 18px;
+		border-radius: 12px;
+	}
+	/* Reduce large headings on very small screens */
+	h1 { font-size: 1.6rem; }
+	h2 { font-size: 1.1rem; }
+}
+
+/* Landscape phones and small tablets: make layout use columns less and compact cards */
+@media (min-width: 641px) and (max-width: 1024px) {
+	.card { padding: 1rem; }
+	.summary-card, .transaction-list-container { padding: 1rem; }
+}
+
+/* Orientation-aware tweaks */
+@media (orientation: landscape) and (max-width: 812px) {
+	/* use a denser layout when in landscape on small devices */
+	.summary-card p#total-amount { font-size: 2.5rem; }
+}
+
+/* Improve modal touch target spacing */
+.modal .modal-content .mt-4 > button,
+.modal .modal-content .mt-4 > .flex > button {
+	min-height: 44px;
+	padding-left: 14px;
+	padding-right: 14px;
+}
+
+/* Make transaction list items easier to tap */
+.transaction-list-container li {
+	padding-top: 14px;
+	padding-bottom: 14px;
+}
+
+/* Small utility: when body has .compact reduce shadow spacing for small screens */
+body.compact .card { box-shadow: none; padding: 12px; }

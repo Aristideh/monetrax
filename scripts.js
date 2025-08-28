@@ -215,4 +215,68 @@ document.addEventListener('DOMContentLoaded', () => {
     // Save periodically and before unload
     setInterval(() => saveLocalData(userId), 5000);
     window.addEventListener('beforeunload', () => saveLocalData(userId));
+
+    /* --- Added: device sensitivity helpers --- */
+    /**
+     * Returns true if the current device likely supports touch interactions.
+     */
+    function isTouchDevice() {
+        return ('ontouchstart' in window) || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+    }
+
+    /**
+     * Adjust the layout based on screen size / device type.
+     * Adds classes to <body> that CSS uses to adapt spacing and tap targets.
+     */
+    function adjustLayout() {
+        const b = document.body;
+        // touch-friendly class
+        if (isTouchDevice()) {
+            b.classList.add('touch');
+        } else {
+            b.classList.remove('touch');
+        }
+        // compact class for very small screens
+        if (window.innerWidth < 540 || window.innerHeight < 420) {
+            b.classList.add('compact');
+        } else {
+            b.classList.remove('compact');
+        }
+        // tweak font scaling for tiny screens
+        if (window.innerWidth < 380) {
+            document.documentElement.style.fontSize = '14px';
+        } else {
+            document.documentElement.style.fontSize = '';
+        }
+    }
+
+    /**
+     * Ensure focused inputs are visible when virtual keyboard appears on mobile.
+     */
+    function ensureInputVisibleOnFocus() {
+        // capture focus for all inputs inside the app
+        const inputs = document.querySelectorAll('input, select, textarea');
+        inputs.forEach(inp => {
+            inp.addEventListener('focus', () => {
+                // small timeout to allow keyboard to show
+                setTimeout(() => {
+                    if (typeof inp.scrollIntoView === 'function') {
+                        inp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 300);
+            });
+        });
+    }
+
+    /* --- Hook up the layout adjustments --- */
+    window.addEventListener('resize', adjustLayout, { passive: true });
+    window.addEventListener('orientationchange', () => setTimeout(adjustLayout, 200), { passive: true });
+    document.addEventListener('DOMContentLoaded', () => {
+        adjustLayout();
+        ensureInputVisibleOnFocus();
+        // (If your script has an init function, call it here)
+        if (typeof init === 'function') try { init(); } catch(e){/* ignore if not present */ }
+    });
+
+    /* --- End added code --- */
 });

@@ -50,3 +50,16 @@ body {
     outline: 3px solid #2563eb;
     outline-offset: 2px;
 }
+
+/* Minimal additional styles for Monetrax when served from GitHub Pages */
+:root {
+    --bg-dark: #0f172a;
+    --card: #1e293b;
+    --muted: #94a3b8;
+}
+body {
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+.modal { display: none; }
+/* small helpers */
+.cursor-pointer { cursor: pointer; }

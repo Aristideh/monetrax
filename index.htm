@@ -3,99 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monetrax</title>
+    <title>Monetrax - Cloud Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-                body {
-            font-family: 'Inter', sans-serif;
-            transition: background-color 0.3s ease;
-        }
-
-        
-        .dark {
-            background-color: #0f172a;
-            color: #f1f5f9; 
-        }
-
-        .dark .card {
-            background-color: #1e293b;
-        }
-
-        .dark .input-field, .dark .summary-card, .dark .transaction-list-container {
-            background-color: #334155;
-            border-color: #475569; 
-            color: #f1f5f9; 
-        }
-
-        .dark .input-field::placeholder {
-            color: #94a3b8; 
-        }
-
-        .dark .cta-button:hover {
-            background-color: #1e40af;
-        }
-
-        .dark .feature-item {
-            background-color: #1e293b;
-        }
-
-        
-        *:focus-visible {
-            outline: 3px solid #2563eb; 
-            outline-offset: 2px;
-        }
-
-        
-        .income-button {
-            background-color: #22c55e; 
-            color: white;
-        }
-        .income-button:hover {
-            background-color: #16a34a; 
-        }
-        .expense-button {
-            background-color: #ef4444;
-            color: white;
-        }
-        .expense-button:hover {
-            background-color: #dc2626; 
-        }
-        .income-amount {
-            color: #22c55e; 
-        }
-        .expense-amount {
-            color: #ef4444; 
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-gray-900">
 
-    
+	<!-- Firebase Config Modal (shown when config is missing) -->
+	<div id="firebase-config-modal" class="modal" style="display:none;">
+		<div class="modal-content text-left">
+			<h3 class="text-xl font-bold text-white mb-2">Firebase Configuration Required</h3>
+			<p class="text-slate-300 text-sm mb-4">Paste your Firebase config JSON here (from the Firebase console -> Project settings).</p>
+			<textarea id="firebase-config-input" rows="8" class="w-full p-3 rounded-lg bg-gray-800 text-slate-200 border border-gray-600" placeholder='{"apiKey":"...","authDomain":"...","projectId":"..."}'></textarea>
+			<div class="mt-4 flex gap-2 justify-end">
+				<button id="save-firebase-config-btn" class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">Save</button>
+				<button id="cancel-firebase-config-btn" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-300">Cancel</button>
+			</div>
+			<p id="firebase-config-error" class="text-red-400 text-sm mt-3 hidden"></p>
+
+			<!-- Friendly option to use Google sign-in without Firebase (only shown when api.json contains client_id) -->
+			<div id="gsi-hint" class="mt-4 text-sm text-slate-300 hidden">
+				<p>You can also sign in directly with Google (no Firebase required) if the app has a Google OAuth client_id.</p>
+				<div class="mt-3 flex justify-end">
+					<button id="use-gsi-btn" class="bg-white text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-100 transition duration-200">
+						<i class="fab fa-google mr-2"></i> Sign in with Google (no Firebase)
+					</button>
+				</div>
+			</div>
+
+			<!-- Supabase config (new) -->
+			<hr class="my-4 border-slate-600" />
+			<h4 class="text-sm font-semibold text-slate-200 mb-2">Supabase (optional)</h4>
+			<p class="text-xs text-slate-400 mb-2">Paste your Supabase URL and anon key to use Supabase auth + storage instead of Firebase.</p>
+			<input id="supabase-url" class="w-full p-2 rounded-md bg-gray-800 text-slate-200 border border-gray-600 mb-2" placeholder="https://xyz.supabase.co" />
+			<input id="supabase-key" class="w-full p-2 rounded-md bg-gray-800 text-slate-200 border border-gray-600 mb-2" placeholder="anon-public-key" />
+			<div class="flex justify-end gap-2">
+				<button id="save-supabase-config-btn" class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700">Save Supabase</button>
+			</div>
+
+		</div>
+	</div>
+
+    <!-- Modal for validation errors -->
+    <div id="alert-modal" class="modal">
+        <div class="modal-content text-center">
+            <h3 class="text-xl font-bold text-red-400 mb-4">Error</h3>
+            <p id="alert-message" class="text-slate-300 mb-6"></p>
+            <button onclick="document.getElementById('alert-modal').style.display='none';"
+                class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700 transition duration-300">
+                OK
+            </button>
+        </div>
+    </div>
+
+    <!-- Main container -->
     <div class="dark min-h-screen p-4 sm:p-8">
 
-  
-        <header class="text-center py-8">
+        <!-- Header -->
+        <header class="text-center py-8 relative">
             <h1 class="text-5xl font-bold text-white">Monetrax</h1>
             <p class="text-lg text-slate-400 mt-2">Your simple, effective money tracker</p>
+            <div id="auth-info" class="absolute top-4 right-4 flex items-center gap-2">
+                <span id="user-display-name" class="text-sm text-slate-400 hidden"></span>
+                <button id="auth-button" class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">
+                    <i class="fab fa-google mr-2"></i> <span id="auth-button-label">Sign In (local)</span>
+                </button>
+
+                <!-- Export / Import controls for local testing and sharing -->
+                <button id="export-btn" title="Export local data" class="ml-2 bg-gray-700 text-white py-2 px-3 rounded-md hover:bg-gray-600">Export</button>
+                <label for="import-file" class="ml-2 bg-gray-700 text-white py-2 px-3 rounded-md hover:bg-gray-600 cursor-pointer">Import</label>
+                <input id="import-file" type="file" accept="application/json" style="display:none" />
+            </div>
         </header>
 
         <main class="max-w-4xl mx-auto space-y-8">
 
-          
+            <!-- Hero Section -->
             <section class="bg-blue-600 rounded-2xl shadow-xl p-8 text-center text-white">
                 <h2 class="text-3xl font-bold">Take Control of Your Finances</h2>
                 <p class="mt-2 text-slate-100">Track your income and expenses effortlessly and gain a clearer view of your money.</p>
             </section>
 
-           
+            <!-- Main App Card -->
             <div class="card bg-gray-800 rounded-2xl shadow-xl p-6 sm:p-8">
-                
-           
+
+                <!-- Transaction Input Section -->
                 <section class="mb-8">
                     <h2 class="text-2xl font-bold text-white mb-4">Quick Add Transaction</h2>
                     <form id="transaction-form" class="space-y-4">
                         <div class="flex flex-col sm:flex-row gap-4">
-                         
                             <div class="flex-1">
                                 <label for="transaction-category" class="block text-sm font-medium mb-1 text-slate-300">Category</label>
                                 <select id="transaction-category" required
@@ -112,15 +108,14 @@
                                     <option value="Other">Other</option>
                                 </select>
                             </div>
-                        
+
                             <div class="flex-1">
                                 <label for="transaction-amount" class="block text-sm font-medium mb-1 text-slate-300">Amount ($)</label>
                                 <input type="number" id="transaction-amount" placeholder="e.g., 25.50" step="0.01" required
                                     class="input-field w-full p-3 rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300">
                             </div>
                         </div>
-                        
-                        
+
                         <div class="flex gap-4 mt-4">
                             <button type="button" id="expense-btn"
                                 class="w-1/2 py-3 px-6 rounded-xl font-semibold transform transition duration-200 hover:scale-[1.01] active:scale-95 expense-button">
@@ -133,171 +128,49 @@
                         </div>
                     </form>
                 </section>
-                
-                
+
+                <!-- Summary & Transaction List -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                
                     <section class="summary-card p-6 rounded-2xl border border-gray-600 shadow-md">
                         <h3 class="text-lg font-bold text-blue-400">Current Net Total</h3>
                         <p id="total-amount" class="text-5xl font-extrabold mt-2 text-blue-500 transform transition duration-300">$0.00</p>
                     </section>
-
-                   
                     <section class="transaction-list-container p-6 rounded-2xl border border-gray-600 shadow-md">
                         <h3 class="text-lg font-bold text-blue-400 mb-4">Recent Transactions</h3>
                         <ul id="transaction-list" class="space-y-3">
-                            
+                        </ul>
+                    </section>
                 </div>
-
             </div>
 
-           
+            <!-- Features Section -->
             <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="feature-item rounded-xl p-6 shadow-lg text-center transition duration-200 hover:scale-[1.02]">
-                    <span class="text-3xl">🚀</span>
+                    <span class="text-3xl text-blue-400"><i class="fas fa-coins"></i></span>
                     <p class="mt-2 text-slate-300">Effortless Tracking</p>
                 </div>
                 <div class="feature-item rounded-xl p-6 shadow-lg text-center transition duration-200 hover:scale-[1.02]">
-                    <span class="text-3xl">✨</span>
-                    <p class="mt-2 text-slate-300">Clean Interface</p>
+                    <span class="text-3xl text-blue-400"><i class="fas fa-chart-line"></i></span>
+                    <p class="mt-2 text-slate-300">Real-time Insights</p>
                 </div>
                 <div class="feature-item rounded-xl p-6 shadow-lg text-center transition duration-200 hover:scale-[1.02]">
-                    <span class="text-3xl">📊</span>
-                    <p class="mt-2 text-slate-300">Simple Insights</p>
+                    <span class="text-3xl text-blue-400"><i class="fas fa-sync-alt"></i></span>
+                    <p class="mt-2 text-slate-300">Cloud Sync</p>
                 </div>
                 <div class="feature-item rounded-xl p-6 shadow-lg text-center transition duration-200 hover:scale-[1.02]">
-                    <span class="text-3xl">🔒</span>
-                    <p class="mt-2 text-slate-300">Private</p>
+                    <span class="text-3xl text-blue-400"><i class="fas fa-user-shield"></i></span>
+                    <p class="mt-2 text-slate-300">Private & Secure</p>
                 </div>
             </section>
         </main>
 
+        <!-- Footer -->
         <footer class="text-center text-slate-500 mt-8 py-4">
             &copy; 2025 Monetrax. Built with simplicity.
         </footer>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-
-            const transactionForm = document.getElementById('transaction-form');
-            const transactionCategoryInput = document.getElementById('transaction-category');
-            const transactionAmountInput = document.getElementById('transaction-amount');
-            const totalAmountElement = document.getElementById('total-amount');
-            const transactionListElement = document.getElementById('transaction-list');
-            const expenseBtn = document.getElementById('expense-btn');
-            const incomeBtn = document.getElementById('income-btn');
-            
-           
-            let transactions = [];
-
-            /**
-             * Updates the displayed total amount and applies a subtle animation.
-             * @param {number} newTotal The new total to display.
-             */
-            function updateTotalDisplay(newTotal) {
-                totalAmountElement.style.transform = 'scale(1.05)';
-                totalAmountElement.textContent = `$${newTotal.toFixed(2)}`;
-                setTimeout(() => {
-                    totalAmountElement.style.transform = 'scale(1)';
-                }, 200);
-            }
-
-            function renderTransactions() {
-                
-                transactionListElement.innerHTML = '';
-                
-                
-                transactions.forEach(transaction => {
-                    const li = document.createElement('li');
-                    li.classList.add('flex', 'justify-between', 'items-center', 'p-3', 'rounded-lg', 'bg-gray-700', 'hover:scale-[1.01]', 'transform', 'transition-transform');
-                    
-                    const amountClass = transaction.type === 'income' ? 'income-amount' : 'expense-amount';
-                    const sign = transaction.type === 'income' ? '+' : '-';
-
-                    li.innerHTML = `
-                        <span class="text-sm sm:text-base font-medium text-slate-200">${transaction.category}</span>
-                        <span class="font-bold text-sm sm:text-base ${amountClass}">${sign}$${transaction.amount.toFixed(2)}</span>
-                    `;
-                    transactionListElement.appendChild(li);
-                });
-            }
-
-          
-            function loadData() {
-               
-                const storedTotal = localStorage.getItem('monetraxNetTotal');
-                if (storedTotal) {
-                    netTotal = parseFloat(storedTotal);
-                    updateTotalDisplay(netTotal);
-                }
-
-               
-                const storedTransactions = localStorage.getItem('monetraxTransactions');
-                if (storedTransactions) {
-                    transactions = JSON.parse(storedTransactions);
-                    renderTransactions();
-                }
-            }
-            
-            
-            expenseBtn.addEventListener('click', () => handleTransaction('expense'));
-            incomeBtn.addEventListener('click', () => handleTransaction('income'));
-
-            /**
-             * Handles the transaction logic for both income and expenses.
-             * @param {string} type The transaction type ('income' or 'expense').
-             */
-            function handleTransaction(type) {
-                const category = transactionCategoryInput.value;
-                const amount = parseFloat(transactionAmountInput.value);
-
-                
-                if (!category || isNaN(amount) || amount <= 0) {
-                    alert('Please select a category and enter a valid positive amount.');
-                    return;
-                }
-
-                
-                const newTransaction = {
-                    category: category,
-                    amount: amount,
-                    type: type,
-                    timestamp: new Date().toISOString()
-                };
-                
-                
-                transactions.unshift(newTransaction);
-                
-               
-                if (transactions.length > 10) {
-                    transactions.pop();
-                }
-
-               
-                if (type === 'income') {
-                    netTotal += amount;
-                } else {
-                    netTotal -= amount;
-                }
-                
-               
-                localStorage.setItem('monetraxNetTotal', netTotal.toFixed(2));
-                localStorage.setItem('monetraxTransactions', JSON.stringify(transactions));
-
-                
-                updateTotalDisplay(netTotal);
-                renderTransactions();
-
-                
-                transactionForm.reset();
-                transactionAmountInput.focus();
-            }
-
-            
-            loadData();
-        });
-    </script>
-
+    <!-- Firebase SDKs -->
+    <script type="module" src="scripts.js"></script>
 </body>
 </html>

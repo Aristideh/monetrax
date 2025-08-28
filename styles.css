@@ -1,0 +1,52 @@
+/* Custom styles for transaction type buttons and colors */
+.income-button {
+    background-color: #22c55e;
+    color: white;
+}
+.income-button:hover {
+    background-color: #16a34a;
+}
+.expense-button {
+    background-color: #ef4444;
+    color: white;
+}
+.expense-button:hover {
+    background-color: #dc2626;
+}
+.income-amount {
+    color: #22c55e;
+}
+.expense-amount {
+    color: #ef4444;
+}
+
+/* Base styles for dark mode from the HTML file */
+body {
+    font-family: 'Inter', sans-serif;
+    transition: background-color 0.3s ease;
+}
+.dark {
+    background-color: #0f172a;
+    color: #f1f5f9;
+}
+.dark .card {
+    background-color: #1e293b;
+}
+.dark .input-field, .dark .summary-card, .dark .transaction-list-container {
+    background-color: #334155;
+    border-color: #475569;
+    color: #f1f5f9;
+}
+.dark .input-field::placeholder {
+    color: #94a3b8;
+}
+.dark .cta-button:hover {
+    background-color: #1e40af;
+}
+.dark .feature-item {
+    background-color: #1e293b;
+}
+*:focus-visible {
+    outline: 3px solid #2563eb;
+    outline-offset: 2px;
+}

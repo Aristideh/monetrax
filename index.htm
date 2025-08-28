@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monetrax</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+                body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease;
+        }
+
+        
+        .dark {
+            background-color: #0f172a;
+            color: #f1f5f9; 
+        }
+
+        .dark .card {
+            background-color: #1e293b;
+        }
+
+        .dark .input-field, .dark .summary-card, .dark .transaction-list-container {
+            background-color: #334155;
+            border-color: #475569; 
+            color: #f1f5f9; 
+        }
+
+        .dark .input-field::placeholder {
+            color: #94a3b8; 
+        }
+
+        .dark .cta-button:hover {
+            background-color: #1e40af;
+        }
+
+        .dark .feature-item {
+            background-color: #1e293b;
+        }
+
+        
+        *:focus-visible {
+            outline: 3px solid #2563eb; 
+            outline-offset: 2px;
+        }
+
+        
+        .income-button {
+            background-color: #22c55e; 
+            color: white;
+        }
+        .income-button:hover {
+            background-color: #16a34a; 
+        }
+        .expense-button {
+            background-color: #ef4444;
+            color: white;
+        }
+        .expense-button:hover {
+            background-color: #dc2626; 
+        }
+        .income-amount {
+            color: #22c55e; 
+        }
+        .expense-amount {
+            color: #ef4444; 
+        }
+    </style>
+</head>
+<body class="bg-gray-900">
+
+    
+    <div class="dark min-h-screen p-4 sm:p-8">
+
+  
+        <header class="text-center py-8">
+            <h1 class="text-5xl font-bold text-white">Monetrax</h1>
+            <p class="text-lg text-slate-400 mt-2">Your simple, effective money tracker</p>
+        </header>
+
+        <main class="max-w-4xl mx-auto space-y-8">
+
+          
+            <section class="bg-blue-600 rounded-2xl shadow-xl p-8 text-center text-white">
+                <h2 class="text-3xl font-bold">Take Control of Your Finances</h2>
+                <p class="mt-2 text-slate-100">Track your income and expenses effortlessly and gain a clearer view of your money.</p>
+            </section>
+
+           
+            <div class="card bg-gray-800 rounded-2xl shadow-xl p-6 sm:p-8">
+                
+           
+                <section class="mb-8">
+                    <h2 class="text-2xl font-bold text-white mb-4">Quick Add Transaction</h2>
+                    <form id="transaction-form" class="space-y-4">
+                        <div class="flex flex-col sm:flex-row gap-4">
+                         
+                            <div class="flex-1">
+                                <label for="transaction-category" class="block text-sm font-medium mb-1 text-slate-300">Category</label>
+                                <select id="transaction-category" required
+                                    class="input-field w-full p-3 rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300">
+                                    <option value="">-- Select a category --</option>
+                                    <option value="Food">Food</option>
+                                    <option value="Transportation">Transportation</option>
+                                    <option value="Bills">Bills</option>
+                                    <option value="Shopping">Shopping</option>
+                                    <option value="Entertainment">Entertainment</option>
+                                    <option value="Salary">Salary</option>
+                                    <option value="Freelance">Freelance</option>
+                                    <option value="Gift">Gift</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        
+                            <div class="flex-1">
+                                <label for="transaction-amount" class="block text-sm font-medium mb-1 text-slate-300">Amount ($)</label>
+                                <input type="number" id="transaction-amount" placeholder="e.g., 25.50" step="0.01" required
+                                    class="input-field w-full p-3 rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300">
+                            </div>
+                        </div>
+                        
+                        
+                        <div class="flex gap-4 mt-4">
+                            <button type="button" id="expense-btn"
+                                class="w-1/2 py-3 px-6 rounded-xl font-semibold transform transition duration-200 hover:scale-[1.01] active:scale-95 expense-button">
+                                Add Expense (-)
+                            </button>
+                            <button type="button" id="income-btn"
+                                class="w-1/2 py-3 px-6 rounded-xl font-semibold transform transition duration-200 hover:scale-[1.01] active:scale-95 income-button">
+                                Add Income (+)
+                            </button>
+                        </div>
+                    </form>
+                </section>
+                
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                    <section class="summary-card p-6 rounded-2xl border border-gray-600 shadow-md">
+                        <h3 class="text-lg font-bold text-blue-400">Current Net Total</h3>
+                        <p id="total-amount" class="text-5xl font-extrabold mt-2 text-blue-500 transform transition duration-300">$0.00</p>
+                    </section>
+
+                   
+                    <section class="transaction-list-container p-6 rounded-2xl border border-gray-600 shadow-md">
+                        <h3 class="text-lg font-bold text-blue-400 mb-4">Recent Transactions</h3>
+                        <ul id="transaction-list" class="space-y-3">
+                            
+                </div>
+
+            </div>
+
+           
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="feature-item rounded-xl p-6 shadow-lg text-center transition duration-200 hover:scale-[1.02]">
+                    <span class="text-3xl">🚀</span>
+                    <p class="mt-2 text-slate-300">Effortless Tracking</p>
+                </div>
+                <div class="feature-item rounded-xl p-6 shadow-lg text-center transition duration-200 hover:scale-[1.02]">
+                    <span class="text-3xl">✨</span>
+                    <p class="mt-2 text-slate-300">Clean Interface</p>
+                </div>
+                <div class="feature-item rounded-xl p-6 shadow-lg text-center transition duration-200 hover:scale-[1.02]">
+                    <span class="text-3xl">📊</span>
+                    <p class="mt-2 text-slate-300">Simple Insights</p>
+                </div>
+                <div class="feature-item rounded-xl p-6 shadow-lg text-center transition duration-200 hover:scale-[1.02]">
+                    <span class="text-3xl">🔒</span>
+                    <p class="mt-2 text-slate-300">Private</p>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center text-slate-500 mt-8 py-4">
+            &copy; 2025 Monetrax. Built with simplicity.
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const transactionForm = document.getElementById('transaction-form');
+            const transactionCategoryInput = document.getElementById('transaction-category');
+            const transactionAmountInput = document.getElementById('transaction-amount');
+            const totalAmountElement = document.getElementById('total-amount');
+            const transactionListElement = document.getElementById('transaction-list');
+            const expenseBtn = document.getElementById('expense-btn');
+            const incomeBtn = document.getElementById('income-btn');
+            
+           
+            let transactions = [];
+
+            /**
+             * Updates the displayed total amount and applies a subtle animation.
+             * @param {number} newTotal The new total to display.
+             */
+            function updateTotalDisplay(newTotal) {
+                totalAmountElement.style.transform = 'scale(1.05)';
+                totalAmountElement.textContent = `$${newTotal.toFixed(2)}`;
+                setTimeout(() => {
+                    totalAmountElement.style.transform = 'scale(1)';
+                }, 200);
+            }
+
+            function renderTransactions() {
+                
+                transactionListElement.innerHTML = '';
+                
+                
+                transactions.forEach(transaction => {
+                    const li = document.createElement('li');
+                    li.classList.add('flex', 'justify-between', 'items-center', 'p-3', 'rounded-lg', 'bg-gray-700', 'hover:scale-[1.01]', 'transform', 'transition-transform');
+                    
+                    const amountClass = transaction.type === 'income' ? 'income-amount' : 'expense-amount';
+                    const sign = transaction.type === 'income' ? '+' : '-';
+
+                    li.innerHTML = `
+                        <span class="text-sm sm:text-base font-medium text-slate-200">${transaction.category}</span>
+                        <span class="font-bold text-sm sm:text-base ${amountClass}">${sign}$${transaction.amount.toFixed(2)}</span>
+                    `;
+                    transactionListElement.appendChild(li);
+                });
+            }
+
+          
+            function loadData() {
+               
+                const storedTotal = localStorage.getItem('monetraxNetTotal');
+                if (storedTotal) {
+                    netTotal = parseFloat(storedTotal);
+                    updateTotalDisplay(netTotal);
+                }
+
+               
+                const storedTransactions = localStorage.getItem('monetraxTransactions');
+                if (storedTransactions) {
+                    transactions = JSON.parse(storedTransactions);
+                    renderTransactions();
+                }
+            }
+            
+            
+            expenseBtn.addEventListener('click', () => handleTransaction('expense'));
+            incomeBtn.addEventListener('click', () => handleTransaction('income'));
+
+            /**
+             * Handles the transaction logic for both income and expenses.
+             * @param {string} type The transaction type ('income' or 'expense').
+             */
+            function handleTransaction(type) {
+                const category = transactionCategoryInput.value;
+                const amount = parseFloat(transactionAmountInput.value);
+
+                
+                if (!category || isNaN(amount) || amount <= 0) {
+                    alert('Please select a category and enter a valid positive amount.');
+                    return;
+                }
+
+                
+                const newTransaction = {
+                    category: category,
+                    amount: amount,
+                    type: type,
+                    timestamp: new Date().toISOString()
+                };
+                
+                
+                transactions.unshift(newTransaction);
+                
+               
+                if (transactions.length > 10) {
+                    transactions.pop();
+                }
+
+               
+                if (type === 'income') {
+                    netTotal += amount;
+                } else {
+                    netTotal -= amount;
+                }
+                
+               
+                localStorage.setItem('monetraxNetTotal', netTotal.toFixed(2));
+                localStorage.setItem('monetraxTransactions', JSON.stringify(transactions));
+
+                
+                updateTotalDisplay(netTotal);
+                renderTransactions();
+
+                
+                transactionForm.reset();
+                transactionAmountInput.focus();
+            }
+
+            
+            loadData();
+        });
+    </script>
+
+</body>
+</html>
